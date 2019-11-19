@@ -11,11 +11,6 @@ import json
 # var a = 1; while (a<121){raeumeFeld([FELDNUMMER], a); a++;}
 
 
-def feld_skips(driver, saat_id):
-
-    return feld, skips
-
-
 def feld_ernten(driver, farm, feld, produkt):
     currentuserlevel = driver.execute_script('return currentuserlevel;')
     if int(currentuserlevel) < 4:
