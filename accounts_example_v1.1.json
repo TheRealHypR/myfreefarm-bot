@@ -1,17 +1,17 @@
 {
   "accounts": {
-    "someaccountname":{
-      "active": "0",
+    "accountname":{
+      "active": "1",
       "server": "1",
       "password": "secretpassword",
       "rackitem": "2",
-      "futtercount": "15",
+      "futtercount": "1",
       "vertrag": {
-        "partner": "someaccountname",
-        "produkt": "9",
+        "partner": "accountname",
+        "rackitem": "9",
+        "menge": "8",
         "schwelle": "10",
-        "itemcount": "8",
-        "itemprice": "1.71"
+        "preis": "1.71"
       }
     }
   }
