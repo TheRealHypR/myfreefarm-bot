@@ -3,7 +3,7 @@
 <b>German:</b> ein python skript um Prozesse in MyFreeFarm zu automatisieren.
 ## Installation
 ### Linux
-##### 1. Install the needed Packages
+##### 1. Install the needed packages
 ```
 sudo apt-get install screen git nano python3 python3-pip firefox-esr
 pip3 install selenium
@@ -19,6 +19,6 @@ https://github.com/mozilla/geckodriver/releases
 git clone https://github.com/TheRealHypR/myfreefarm-bot.git
 ```
 ##### 4. Rename `accounts_example_v1.X.json` to `accounts.json` and edit as you need
-##### 5. Start the Bot in a screen or somthing...
+##### 5. Start the Bot in a screen or something...
 ### Windows
 SOON
