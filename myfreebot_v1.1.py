@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+#from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import JavascriptException
 from time import sleep
 import json
@@ -10,22 +11,25 @@ import json
 # var a = 1; while (a<121){raeumeFeld([FELDNUMMER], a); a++;}
 
 
-def feld_ernten(driver, feld, saat_id):
+def feld_ernten(driver, farm, feld, produkt):
     currentuserlevel = driver.execute_script('return currentuserlevel;')
     if int(currentuserlevel) < 4:
-        driver.execute_script('var a=1;while(a<121){farmAction("garden_harvest", 1, ' + str(feld) + ', `pflanze[]=' + str(saat_id) + '&feld[]=${a}&felder[]=${a}`); a++;}')
+        driver.execute_script('var a=1;while(a<121){farmAction("garden_harvest", ' + str(farm) + ', ' + str(feld) + ', `pflanze[]=' + str(produkt) + '&feld[]=${a}&felder[]=${a}`); a++;}')
+        sleep(0.5)
     else:
         driver.execute_script('farmAction("cropgarden", 1, ' + str(feld) + ');')
     return
 
 
-def feld_pflanzen(driver, feld, saat_id):
-    driver.execute_script('var a=1; while (a<121){farmAction("garden_plant", 1, ' + str(feld) + ', `pflanze[]=' + str(saat_id) + '&feld[]=${a}&felder[]=${a}`, 5); a++;}')
+def feld_pflanzen(driver, farm, feld, saat_id):
+    driver.execute_script('var a=1; while (a<121){farmAction("garden_plant", ' + str(farm) + ', ' + str(feld) + ', `pflanze[]=' + str(saat_id) + '&feld[]=${a}&felder[]=${a}`, 5); a++;}')
+    sleep(0.5)
     return
 
 
-def feld_giessen(driver, feld):
-    driver.execute_script('var a=1;while(a<121){farmAction("garden_water", 1, ' + str(feld) + ', `feld[]=${a}&felder[]=${a}`); a++;}')
+def feld_giessen(driver, farm, feld):
+    driver.execute_script('var a=1;while(a<121){farmAction("garden_water", ' + str(farm) + ', ' + str(feld) + ', `feld[]=${a}&felder[]=${a}`); a++;}')
+    sleep(0.5)
     return
 
 
@@ -34,17 +38,45 @@ def tiere_sammeln(driver, farm, feld):
     return
 
 
-def tiere_fuettern(driver, farm, feld, futtermenge):
+def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
+    """
+        buildingids
+        1 = Acker
+        2 = Hühner
+        3 = Kühe
+        4 = Schafe
+        5 = Bienen
+        11 = Fischzucht
+    """
     rack = driver.execute_script('return rackElement')
-    if int(rack[1]['number']) <= int(rack[2]['number']):
-        huhn_food = 1
+    if int(buildingid) == 2:  # Hühner
+        if int(rack['1']['number']) >= int(rack['2']['number']):
+            futtertyp = 1
+        else:
+            futtertyp = 2
+    elif int(buildingid) == 3:  # Kühe
+        if int(rack['3']['number']) >= int(rack['4']['number']):
+            futtertyp = 3
+        else:
+            futtertyp = 4
+    elif int(buildingid) == 4:  # Schafe
+        if int(rack['5']['number']) >= int(rack['6']['number']):
+            futtertyp = 5
+        else:
+            futtertyp = 6
+    elif int(buildingid) == 5:  # Bienen
+        if int(rack['7']['number']) >= int(rack['8']['number']):
+            futtertyp = 7
+        else:
+            futtertyp = 8
+    elif int(buildingid) == 11:  # Zierfische
+        if int(rack['92']['number']) >= int(rack['93']['number']):
+            futtertyp = 92
+        else:
+            futtertyp = 93
     else:
-        huhn_food = 2
-    huhn_food = max(int(rack[1]['number']), int(rack[2]['number']))
-    kuh_food = max(int(rack[3]['number']), int(rack[4]['number']))
-    schaf_food = max(int(rack[5]['number']), int(rack[6]['number']))
-    bee_food = max(int(rack[7]['number']), int(rack[8]['number']))
-    fisch_food = max(int(rack[92]['number']), int(rack[93]['number']))
+        print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
+        return
 
     ajax_request = 'var myajax = createAjaxRequestObj(); myajax.open("GET", "ajax/farm.php?rid=" + rid'\
                    ' + "&mode=inner_feed&farm=' + str(farm) + '&position=' + str(feld) + '&pid=' + str(futtertyp) +\
@@ -118,20 +150,21 @@ def login(driver, login_user, login_server, login_pass):
         exit(1)
     else:
         print('Login erfolgreich!')
-        sleep(1)
 
 
 def main():
 
-    # headless firefox options
-    options = Options()
-    options.headless = True
-    
-    # start the selenium webdriver
-    driver = webdriver.Firefox(firefox_binary='C:/Users/pmadelmayer/AppData/Local/Mozilla Firefox/firefox.exe', options=options)
-
+    # selenium - headless firefox options
+    firefox_options = Options()
+    firefox_options.headless = True
+    driver = webdriver.Firefox(options=firefox_options)
+    """
+    # selenium - headless chrome options
+    chrome_options = Options()
+    chrome_options.add_argument('headless')
+    driver = webdriver.Chrome(options=chrome_options)
+    """
     while 1:
-        # TODO: Möglichkeit verschiedene Account Files einlesen
         with open('accounts.json') as acc_file:
             accounts = json.load(acc_file)
 
@@ -160,8 +193,8 @@ def main():
                 vertrag_partner = accounts['accounts'][account]['vertrag']['partner']
                 vertrag_produkt = str(accounts['accounts'][account]['vertrag']['rackitem'])
                 vertrag_daten = str(accounts['accounts'][account]['vertrag']['rackitem']) + '_' +\
-                                str(accounts['accounts'][account]['vertrag']['itemcount']) + '_' +\
-                                str(accounts['accounts'][account]['vertrag']['itemprice']) + '_0|'
+                                str(accounts['accounts'][account]['vertrag']['menge']) + '_' +\
+                                str(accounts['accounts'][account]['vertrag']['preis']) + '_0|'
                 vertrag_schwelle = int(accounts['accounts'][account]['vertrag']['schwelle'])
             else:
                 vertrag_senden = 0
@@ -191,38 +224,38 @@ def main():
                         remain = farminfo[str(feld)]['production'][0]['remain']
 
                         if int(remain) <= 0 and int(feld_art) == 1:
-                            print('Fertiger Acker wird neu bepflanzt!')
+                            print('FARM', farm, ', FELD', feld, ': Fertiger Acker wird neu bepflanzt!')
                             print('jetzt wird geerntet...')
-                            feld_ernten(driver, feld, produkt)
+                            feld_ernten(driver, farm, feld, produkt)
                             print('jetzt wird gepflanzt...')
-                            feld_pflanzen(driver, feld, saat_id)
+                            feld_pflanzen(driver, farm, feld, saat_id)
                             print('jetzt wird gegossen...')
-                            feld_giessen(driver, feld)
+                            feld_giessen(driver, farm, feld)
                             print('Feld fertig!')
                         elif int(remain) <= 0 and int(is_animal) > 0:
-                            print('Fertige Tiere werden neu gefüttert!')
+                            print('FARM', farm, ', FELD', feld, ': Fertige Tiere werden neu gefüttert!')
                             print('jetzt werden Tierprodukte gesammelt...')
                             tiere_sammeln(driver, farm, feld)
                             print('jetzt werden Tiere gefüttert...')
-                            tiere_fuettern(driver, farm, feld, futtermenge)
+                            tiere_fuettern(driver, farm, feld, futtermenge, feld_art)
                             print('Tiere fertig!')
                         else:
-                            print('Feld/Tiere in Arbeit, übersprungen!')
+                            print('FARM', farm, ', FELD', feld, ': Feld/Tiere in Arbeit, übersprungen!')
                     else:
                         if int(feld_art) == 1:
-                            print('Leerer Acker wird bepflanzt!')
+                            print('FARM', farm, ', FELD', feld, ': Leerer Acker wird bepflanzt!')
                             print('jetzt wird gepflanzt...')
-                            feld_pflanzen(driver, feld, saat_id)
+                            feld_pflanzen(driver, farm, feld, saat_id)
                             print('jetzt wird gegossen...')
-                            feld_giessen(driver, feld)
+                            feld_giessen(driver, farm, feld)
                             print('Feld fertig!')
                         elif int(is_animal) > 0:
-                            print('Untätige Tiere werden gefüttert!')
+                            print('FARM', farm, ', FELD', feld, ': Untätige Tiere werden gefüttert!')
                             print('jetzt werden Tiere gefüttert...')
-                            tiere_fuettern(driver, farm, feld, futtermenge)
+                            tiere_fuettern(driver, farm, feld, futtermenge, feld_art)
                             print('Tiere fertig!')
                         else:
-                            print('Bauplatz nicht freigeschaltet oder leer!')
+                            print('FARM', farm, ', FELD', feld, ': Bauplatz nicht freigeschaltet oder leer!')
 
             if vertrag_senden == 1:
                 anzahl_string = 'rackElement[' + vertrag_produkt + ']["number"];'
