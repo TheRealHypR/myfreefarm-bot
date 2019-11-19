@@ -11,26 +11,86 @@ import json
 # var a = 1; while (a<121){raeumeFeld([FELDNUMMER], a); a++;}
 
 
+def feld_skips(driver, saat_id):
+
+    return feld, skips
+
+
 def feld_ernten(driver, farm, feld, produkt):
     currentuserlevel = driver.execute_script('return currentuserlevel;')
     if int(currentuserlevel) < 4:
-        driver.execute_script('var a=1;while(a<121){farmAction("garden_harvest", ' + str(farm) + ', ' + str(feld) + ', `pflanze[]=' + str(produkt) + '&feld[]=${a}&felder[]=${a}`); a++;}')
-        sleep(0.5)
+        script_string = 'return produkt_x[' + produkt + '] * produkt_y[' + produkt + ']'
+        plant_size = driver.execute_script(script_string)
+        steps = range(1, 121)
+        skips = [13, 15, 17, 19, 21, 23, 37, 39, 41, 43, 45, 47, 61, 63, 65, 67, 69, 71, 85, 87, 89, 91, 93, 95, 109, 111, 113, 115, 117, 119]
+
+        if int(plant_size) == 1:
+            for i in range(1, 121):
+                driver.execute_script('farmAction("garden_harvest", ' + str(farm) + ', ' + str(feld) + ', "pflanze[]=' + str(produkt) + '&feld[]=' + str(i) + '&felder[]=' + str(i) + '");')
+            return
+
+        if int(plant_size) == 2:
+            for i in steps[::2]:
+                driver.execute_script('farmAction("garden_harvest", ' + str(farm) + ', ' + str(feld) + ', "pflanze[]=' + str(produkt) + '&feld[]=' + str(i) + '&felder[]=' + str(i) + ',' + str(i + 1) + '");')
+            return
+
+        if int(plant_size) == 4:
+            for i in steps[::2]:
+                if i in skips:
+                    continue
+                driver.execute_script('farmAction("garden_harvest", ' + str(farm) + ', ' + str(feld) + ', "pflanze[]=' + str(produkt) + '&feld[]=' + str(i) + '&felder[]=' + str(i) + ',' + str(i + 1) + ',' + str(i + 12) + ',' + str(i + 13) + '");')
+            return
     else:
         driver.execute_script('farmAction("cropgarden", 1, ' + str(feld) + ');')
     return
 
 
 def feld_pflanzen(driver, farm, feld, saat_id):
-    driver.execute_script('var a=1; while (a<121){farmAction("garden_plant", ' + str(farm) + ', ' + str(feld) + ', `pflanze[]=' + str(saat_id) + '&feld[]=${a}&felder[]=${a}`, 5); a++;}')
-    sleep(0.5)
-    return
+    script_string = 'return produkt_x[' + saat_id + '] * produkt_y[' + saat_id + ']'
+    plant_size = driver.execute_script(script_string)
+    steps = range(1, 121)
+    skips = [13, 15, 17, 19, 21, 23, 37, 39, 41, 43, 45, 47, 61, 63, 65, 67, 69, 71, 85, 87, 89, 91, 93, 95, 109, 111, 113, 115, 117, 119]
+
+    if int(plant_size) == 1:
+        for i in range(1, 121):
+            driver.execute_script('farmAction("garden_plant", ' + str(farm) + ', ' + str(feld) + ', "pflanze[]=' + str(saat_id) + '&feld[]=' + str(i) + '&felder[]=' + str(i) + '", 5);')
+        return
+
+    if int(plant_size) == 2:
+        for i in steps[::2]:
+            driver.execute_script('farmAction("garden_plant", ' + str(farm) + ', ' + str(feld) + ', "pflanze[]=' + str(saat_id) + '&feld[]=' + str(i) + '&felder[]=' + str(i) + ',' + str(i+1) + '", 5);')
+        return
+
+    if int(plant_size) == 4:
+        for i in steps[::2]:
+            if i in skips:
+                continue
+            driver.execute_script('farmAction("garden_plant", ' + str(farm) + ', ' + str(feld) + ', "pflanze[]=' + str(saat_id) + '&feld[]=' + str(i) + '&felder[]=' + str(i) + ',' + str(i+1) + ',' + str(i+12) + ',' + str(i+13) + '", 5);')
+        return
 
 
-def feld_giessen(driver, farm, feld):
-    driver.execute_script('var a=1;while(a<121){farmAction("garden_water", ' + str(farm) + ', ' + str(feld) + ', `feld[]=${a}&felder[]=${a}`); a++;}')
-    sleep(0.5)
-    return
+def feld_giessen(driver, farm, feld, saat_id):
+    script_string = 'return produkt_x[' + saat_id + '] * produkt_y[' + saat_id + ']'
+    plant_size = driver.execute_script(script_string)
+    steps = range(1, 121)
+    skips = [13, 15, 17, 19, 21, 23, 37, 39, 41, 43, 45, 47, 61, 63, 65, 67, 69, 71, 85, 87, 89, 91, 93, 95, 109, 111, 113, 115, 117, 119]
+
+    if int(plant_size) == 1:
+        for i in range(1, 121):
+            driver.execute_script('farmAction("garden_water", ' + str(farm) + ', ' + str(feld) + ', "feld[]=' + str(i) + '&felder[]=' + str(i) + '");')
+        return
+
+    if int(plant_size) == 2:
+        for i in steps[::2]:
+            driver.execute_script('farmAction("garden_water", ' + str(farm) + ', ' + str(feld) + ', "feld[]=' + str(i) + '&felder[]=' + str(i) + ',' + str(i + 1) + '");')
+        return
+
+    if int(plant_size) == 4:
+        for i in steps[::2]:
+            if i in skips:
+                continue
+            driver.execute_script('farmAction("garden_water", ' + str(farm) + ', ' + str(feld) + ', "feld[]=' + str(i) + '&felder[]=' + str(i) + ',' + str(i + 1) + ',' + str(i + 12) + ',' + str(i + 13) + '");')
+        return
 
 
 def tiere_sammeln(driver, farm, feld):
@@ -157,7 +217,7 @@ def main():
     # selenium - headless firefox options
     firefox_options = Options()
     firefox_options.headless = True
-    driver = webdriver.Firefox(options=firefox_options)
+    driver = webdriver.Firefox(firefox_binary='C:/Users/pmadelmayer/AppData/Local/Mozilla Firefox/firefox.exe',options=firefox_options)
     """
     # selenium - headless chrome options
     chrome_options = Options()
@@ -230,7 +290,7 @@ def main():
                             print('jetzt wird gepflanzt...')
                             feld_pflanzen(driver, farm, feld, saat_id)
                             print('jetzt wird gegossen...')
-                            feld_giessen(driver, farm, feld)
+                            feld_giessen(driver, farm, feld, saat_id)
                             print('Feld fertig!')
                         elif int(remain) <= 0 and int(is_animal) > 0:
                             print('FARM', farm, ', FELD', feld, ': Fertige Tiere werden neu gefüttert!')
@@ -247,7 +307,7 @@ def main():
                             print('jetzt wird gepflanzt...')
                             feld_pflanzen(driver, farm, feld, saat_id)
                             print('jetzt wird gegossen...')
-                            feld_giessen(driver, farm, feld)
+                            feld_giessen(driver, farm, feld, saat_id)
                             print('Feld fertig!')
                         elif int(is_animal) > 0:
                             print('FARM', farm, ', FELD', feld, ': Untätige Tiere werden gefüttert!')
