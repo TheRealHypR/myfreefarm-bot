@@ -27,3 +27,5 @@ git clone https://github.com/TheRealHypR/myfreefarm-bot.git
 https://github.com/mozilla/geckodriver/releases
 ```
 ##### 3. Download `accounts_example_v1.X.json` from source, rename it to `accounts.json` and edit as you need
+### accounts.json Hilfe
+[siehe Hier](accounts_example_v1.1.json)
