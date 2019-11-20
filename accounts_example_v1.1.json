@@ -6,6 +6,7 @@
       "password": "secretpassword",
       "rackitem": "2",
       "futtercount": "1",
+      "fabrik_produkte": [9,110,11,12,0,0,0],
       "vertrag": {
         "partner": "accountname",
         "rackitem": "9",
