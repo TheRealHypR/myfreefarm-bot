@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-#from selenium.webdriver.chrome.options import Options
+#from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import JavascriptException
 from time import sleep
 import json
@@ -36,7 +36,7 @@ def feld_ernten(driver, farm, feld, produkt):
                 driver.execute_script('farmAction("garden_harvest", ' + str(farm) + ', ' + str(feld) + ', "pflanze[]=' + str(produkt) + '&feld[]=' + str(i) + '&felder[]=' + str(i) + ',' + str(i + 1) + ',' + str(i + 12) + ',' + str(i + 13) + '");')
             return
     else:
-        driver.execute_script('farmAction("cropgarden", 1, ' + str(feld) + ');')
+        driver.execute_script('farmAction("cropgarden", ' + str(farm) + ', ' + str(feld) + ');')
     return
 
 
@@ -88,20 +88,10 @@ def feld_giessen(driver, farm, feld, saat_id):
         return
 
 
-def tiere_sammeln(driver, farm, feld):
-    driver.execute_script('buildingInnerAction("crop",' + str(farm) + ',' + str(feld) + ');')
-    return
-
-
 def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
     """
-        buildingids
-        1 = Acker
-        2 = Hühner
-        3 = Kühe
-        4 = Schafe
-        5 = Bienen
-        11 = Fischzucht
+    buildingids
+    2 = Hühner, 3 = Kühe, 4 = Schafe, 5 = Bienen, 11 = Fischzucht, 12 = Ziegen, 15 = Hasen
     """
     rack = driver.execute_script('return rackElement')
     if int(buildingid) == 2:  # Hühner
@@ -141,6 +131,31 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
     return
 
 
+def fabrik_starten(driver, farm, feld, buildingid, fabrik_produkte):
+    """
+    buildingids
+    7 = Mayo-Ketchup, 8 = Käse, 9 = Wolle, 10 = Bonbons, 13 = Öl, 14 = Spezialöl, 16 = Strickerei
+    """
+    if int(buildingid) == 7:
+        driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[0]) + ', undefined)')
+    elif int(buildingid) == 8:
+        driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[1]) + ', undefined)')
+    elif int(buildingid) == 9:
+        driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[2]) + ', undefined)')
+    elif int(buildingid) == 10:
+        driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[3]) + ', undefined)')
+    elif int(buildingid) == 13:
+        driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[4]) + ', undefined)')
+    elif int(buildingid) == 14:
+        driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[5]) + ', undefined)')
+    elif int(buildingid) == 16:
+        driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[6]) + ', undefined)')
+    else:
+        print('FARM', farm, ', FELD', feld, ': Fehler beim starten der Fabrik. Produktion übersprungen!')
+    return
+
+
+
 def vertrag(driver, vertrag_partner, vertrag_daten):
     script_string = 'var c={name: "' + vertrag_partner + '",cart: "' + vertrag_daten + '"};' \
                     ' generalAction("contracts_send", c, "' + vertrag_partner + '");'
@@ -178,14 +193,6 @@ def login(driver, login_user, login_server, login_pass):
     # (re)load the website
     driver.get('https://www.myfreefarm.de')
 
-    """
-    # login direkt mit request (geht noch nicht)
-    ajax_request = 'new Ajax.Request("ajax/createtoken2.php?n=" + n, {method:"post",parameters:' \
-                   '{server:"' + login_server + '", username:"' + login_user + '",' \
-                   'password:"' + login_pass + '", ref:"", retid:"" }, onSuccess: function(transport)' \
-                   '{var result = transport.responseText.evalJSON(); location.href = result[1]; }});'
-    get_data = driver.execute_script(ajax_request)
-    """
     # myfreefarm login routine
     server_string = '//*[@id="loginserver"]/option[' + login_server + ']'
     driver.find_element_by_xpath(server_string).click()
@@ -208,17 +215,17 @@ def login(driver, login_user, login_server, login_pass):
 
 
 def main():
-
+    """
     # selenium - headless firefox options
     firefox_options = Options()
     firefox_options.headless = True
-    driver = webdriver.Firefox(firefox_binary='C:/Users/pmadelmayer/AppData/Local/Mozilla Firefox/firefox.exe',options=firefox_options)
+    driver = webdriver.Firefox(firefox_binary='',options=firefox_options)
     """
     # selenium - headless chrome options
     chrome_options = Options()
     chrome_options.add_argument('headless')
     driver = webdriver.Chrome(options=chrome_options)
-    """
+
     while 1:
         with open('accounts.json') as acc_file:
             accounts = json.load(acc_file)
@@ -238,6 +245,8 @@ def main():
 
             saat_id = accounts['accounts'][account]['rackitem']
             futtermenge = accounts['accounts'][account]['futtermenge']
+            if 'fabrik_produkte' in accounts['accounts'][account]:
+                fabrik_produkte = accounts['accounts'][account]['fabrik_produkte']
 
             # dynamische Produkt Zeiten
             zeit_string = 'return produkt_zeit[' + saat_id + '];'
@@ -265,50 +274,83 @@ def main():
                 print('Fehler beim Login-Bonus abholen!')
 
             # FARMEN
+
             farmamount = driver.execute_script('return farmamount')
             for farm in range(1, farmamount+1):
                 farmstring = 'return farms_data.farms[' + str(farm) + ']'
                 farminfo = driver.execute_script(farmstring)
 
                 for feld in range(1, 7):
-                    feld_art = farminfo[str(feld)]['buildingid']
-                    is_animal = farminfo[str(feld)]['animals']
-
+                    buildingid = farminfo[str(feld)]['buildingid']
+                    buildingids_tiere = [2, 3, 4, 5, 11, 12, 15]
+                    buildingids_fabrik = [7, 8, 9, 10, 13, 14, 16]
+                    """
+                    premiumfelder überspringen
+                    try:
+                        farminfo[str(feld)]['premium']
+                    except KeyError:
+                        pass
+                    else:
+                        continue
+                    """
                     if 'production' in farminfo[str(feld)]:
                         produkt = farminfo[str(feld)]['production'][0]['pid']
                         remain = farminfo[str(feld)]['production'][0]['remain']
 
-                        if int(remain) <= 0 and int(feld_art) == 1:
+                        if int(remain) <= 0 and int(buildingid) == 1:
                             print('FARM', farm, ', FELD', feld, ': Fertiger Acker wird neu bepflanzt!')
                             print('jetzt wird geerntet...')
                             feld_ernten(driver, farm, feld, produkt)
+                            sleep(0.1)
                             print('jetzt wird gepflanzt...')
                             feld_pflanzen(driver, farm, feld, saat_id)
+                            sleep(0.1)
                             print('jetzt wird gegossen...')
                             feld_giessen(driver, farm, feld, saat_id)
+                            sleep(0.1)
                             print('Feld fertig!')
-                        elif int(remain) <= 0 and int(is_animal) > 0:
+                        elif int(remain) <= 0 and int(buildingid) in buildingids_tiere:
                             print('FARM', farm, ', FELD', feld, ': Fertige Tiere werden neu gefüttert!')
-                            print('jetzt werden Tierprodukte gesammelt...')
-                            tiere_sammeln(driver, farm, feld)
-                            print('jetzt werden Tiere gefüttert...')
-                            tiere_fuettern(driver, farm, feld, futtermenge, feld_art)
+                            print('jetzt wird gesammelt...')
+                            driver.execute_script('buildingInnerAction("crop",' + str(farm) + ',' + str(feld) + ');')
+                            sleep(0.1)
+                            print('jetzt wird gefüttert...')
+                            tiere_fuettern(driver, farm, feld, futtermenge, buildingid)
+                            sleep(0.1)
                             print('Tiere fertig!')
+                        elif int(remain) <= 0 and int(buildingid) in buildingids_fabrik:
+                            print('FARM', farm, ', FELD', feld, ': Fertige Fabrik wird neu gestartet!')
+                            print('jetzt wird gesammelt...')
+                            driver.execute_script('farmAction("harvestproduction",' + str(farm) + ', ' + str(feld) + ', 1);')
+                            sleep(0.1)
+                            print('jetzt wird gestartet...')
+                            fabrik_starten(driver, farm, feld, buildingid, fabrik_produkte)
+                            sleep(0.1)
+                            print('Fabrik fertig!')
                         else:
-                            print('FARM', farm, ', FELD', feld, ': Feld/Tiere in Arbeit, übersprungen!')
+                            print('FARM', farm, ', FELD', feld, ': Feld/Tiere/Fabrik in Arbeit, übersprungen!')
                     else:
-                        if int(feld_art) == 1:
+                        if int(buildingid) == 1:
                             print('FARM', farm, ', FELD', feld, ': Leerer Acker wird bepflanzt!')
                             print('jetzt wird gepflanzt...')
                             feld_pflanzen(driver, farm, feld, saat_id)
+                            sleep(0.1)
                             print('jetzt wird gegossen...')
                             feld_giessen(driver, farm, feld, saat_id)
+                            sleep(0.1)
                             print('Feld fertig!')
-                        elif int(is_animal) > 0:
+                        elif int(buildingid) in buildingids_tiere:
                             print('FARM', farm, ', FELD', feld, ': Untätige Tiere werden gefüttert!')
-                            print('jetzt werden Tiere gefüttert...')
-                            tiere_fuettern(driver, farm, feld, futtermenge, feld_art)
+                            print('jetzt wird gefüttert...')
+                            tiere_fuettern(driver, farm, feld, futtermenge, buildingid)
+                            sleep(0.1)
                             print('Tiere fertig!')
+                        elif int(buildingid) in buildingids_fabrik:
+                            print('FARM', farm, ', FELD', feld, ': Untätige Fabrik wird gestartet!')
+                            print('jetzt wird gestartet...')
+                            fabrik_starten(driver, farm, feld, buildingid, fabrik_produkte)
+                            sleep(0.1)
+                            print('Fabrik fertig!')
                         else:
                             print('FARM', farm, ', FELD', feld, ': Bauplatz nicht freigeschaltet oder leer!')
 
