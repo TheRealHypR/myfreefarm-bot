@@ -63,6 +63,8 @@ Die einzelnen Zahlen sind die Zutaten für die Produkte der Produktionsgebäude.
 ```
 [Mayo-Küche, Käserei, Wollspinnerei, Bonbonküche, Ölpresse, Spezialölmanufaktur, Strickerei]
 ```
+> z.b.: Wenn in der Mayo-Küche Mayo hergestellt werden soll, kommt auf die erste Stelle 9 (siehe Beispiel-Konfig)  
+
 |Gebäude|Produkt 1|Produkt 2|
 |---|---|---|
 |Mayo-Küche|9 (Mayo)|21 (Ketchup)|
