@@ -1,32 +1,39 @@
 # MyFreeBot
-<b>English:</b> a python script to automate processes in myfreefarm.  
-<b>German:</b> ein python skript um Prozesse in MyFreeFarm zu automatisieren.
+Ein Python Skript um Prozesse in [Myfreefarm](https://www.myfreefarm.de) zu automatisieren.
 ## Installation
 ### Linux
-##### 1. Install the needed packages
+##### 1. Benötige Software installieren  
 ```
 sudo apt-get install screen git nano python3 python3-pip firefox-esr
 pip3 install selenium
 ```
-Please note, that Firefox is the recommended browser to use this script with.
-
-##### 2. Download the latest Geckodriver from here
+##### 2. Lade den benötigten Driver runter
+GeckoDriver wenn du Firefox benutzt:
 ```
 https://github.com/mozilla/geckodriver/releases
 ```
-##### 3. Clone this repository
+ChromeDriver wenn du Chrome benutzt:
+```
+https://sites.google.com/a/chromium.org/chromedriver/downloads
+```
+##### 3. Lade dieses Repository
 ```
 git clone https://github.com/TheRealHypR/myfreefarm-bot.git
 ```
-##### 4. Rename `accounts_example_v1.X.json` to `accounts.json` and edit as you need
-##### 5. Start the Bot in a screen or something...
+##### 4. Die Datei `accounts_example_v1.X.json` zu `accounts.json` umbenennen und Accounts hinzufügen
+##### 5. Starte den Bot in einem Screen oder im Hintergrund
 ### Windows
-##### 1. Download the latest release from the release section over [here](https://github.com/TheRealHypR/myfreefarm-bot/releases)
-##### 2. Download the latest Geckodriver from here
+##### 1. Lade den letzten Release von [Hier](https://github.com/TheRealHypR/myfreefarm-bot/releases)
+##### 2. Lade den benötigten Driver runter
+GeckoDriver wenn du Firefox benutzt:
 ```
 https://github.com/mozilla/geckodriver/releases
 ```
-##### 3. Download `accounts_example_v1.X.json` from source, rename it to `accounts.json` and edit as you need
+ChromeDriver wenn du Chrome benutzt:
+```
+https://sites.google.com/a/chromium.org/chromedriver/downloads
+```
+##### 3. Die Datei `accounts_example_v1.X.json` zu `accounts.json` umbenennen und Accounts hinzufügen
 ## Hilfe zum Einstellen der accounts.json
 ```
 {
