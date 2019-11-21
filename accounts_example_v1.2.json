@@ -5,8 +5,9 @@
       "server": "1",
       "password": "secretpassword",
       "rackitem": "2",
-      "futtercount": "1",
+      "futtermenge": "1",
       "fabrik_produkte": [9,110,11,12,0,0,0],
+      "picknick": {"1": [5,0,0],"2": [10,0,0],"3": [],"4": []},
       "vertrag": {
         "partner": "accountname",
         "rackitem": "9",
