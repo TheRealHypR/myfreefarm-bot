@@ -119,6 +119,16 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
             futtertyp = 92
         else:
             futtertyp = 93
+    elif int(buildingid) == 12:  # Ziegen
+        if int(rack['108']['number']) >= int(rack['109']['number']):
+            futtertyp = 108
+        else:
+            futtertyp = 109
+    elif int(buildingid) == 15:  # Hasen
+        if int(rack['153']['number']) >= int(rack['154']['number']):
+            futtertyp = 153
+        else:
+            futtertyp = 154
     else:
         print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
         return
@@ -144,16 +154,55 @@ def fabrik_starten(driver, farm, feld, buildingid, fabrik_produkte):
         driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[2]) + ', undefined)')
     elif int(buildingid) == 10:
         driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[3]) + ', undefined)')
+    elif int(buildingid) > 10:
+        print('Funktion noch nicht implementiert!')
+        return
+        """
     elif int(buildingid) == 13:
         driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[4]) + ', undefined)')
     elif int(buildingid) == 14:
         driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[5]) + ', undefined)')
     elif int(buildingid) == 16:
         driver.execute_script('farmAction("setadvancedproduction", ' + str(farm) + ', ' + str(feld) + ', ' + str(fabrik_produkte[6]) + ', undefined)')
+        """
     else:
         print('FARM', farm, ', FELD', feld, ': Fehler beim starten der Fabrik. Produktion übersprungen!')
     return
 
+
+def picknick_starten(driver, building_nr, slots, picknick_produkt):
+    for s in range(1, 4):
+        if not slots[str(s)]:
+            # bereit zum starten
+            print('PICKNICK', str(building_nr), ', SLOT', str(s), ': Untätige Produktion wird gestartet!')
+            driver.execute_script('foodworldAction("production", ' + str(picknick_produkt[s - 1]) + ', ' + str(building_nr) + ', 1)')
+            continue
+        try:
+            slots[str(s)]['remain']
+        except KeyError:
+            pass
+        else:
+            print('PICKNICK', str(building_nr), ', SLOT', str(s), ': Slot in Arbeit, übersprungen!')
+            continue
+        try:
+            slots[str(s)]['block']
+        except KeyError:
+            pass
+        else:
+            print('PICKNICK', str(building_nr), ', SLOT', str(s), ': Slot nicht freigeschaltet!')
+            continue
+        try:
+            slots[str(s)]['ready']
+        except KeyError:
+            pass
+        else:
+            # slot bereit zum ernten und neu starten
+            print('PICKNICK', str(building_nr), ', SLOT', str(s), ': Fertige Produktion wird neu gestartet!')
+            driver.execute_script('foodworldAction("crop", 0, ' + str(building_nr) + ', ' + str(s) + ')')
+            sleep(0.1)
+            driver.execute_script('foodworldAction("production", ' + str(picknick_produkt[s - 1]) + ', ' + str(building_nr) + ', 1)')
+            continue
+    return
 
 
 def vertrag(driver, vertrag_partner, vertrag_daten):
@@ -247,13 +296,18 @@ def main():
             futtermenge = accounts['accounts'][account]['futtermenge']
             if 'fabrik_produkte' in accounts['accounts'][account]:
                 fabrik_produkte = accounts['accounts'][account]['fabrik_produkte']
+            if 'picknick' in accounts['accounts'][account]:
+                do_picknick = True
+                picknick_produkte = accounts['accounts'][account]['picknick']
+            else:
+                do_picknick = False
 
             # dynamische Produkt Zeiten
             zeit_string = 'return produkt_zeit[' + saat_id + '];'
             wartezeit = driver.execute_script(zeit_string)
 
             if 'vertrag' in accounts['accounts'][account]:
-                vertrag_senden = 1
+                vertrag_senden = True
                 vertrag_partner = accounts['accounts'][account]['vertrag']['partner']
                 vertrag_produkt = str(accounts['accounts'][account]['vertrag']['rackitem'])
                 vertrag_daten = str(accounts['accounts'][account]['vertrag']['rackitem']) + '_' +\
@@ -261,7 +315,10 @@ def main():
                                 str(accounts['accounts'][account]['vertrag']['preis']) + '_0|'
                 vertrag_schwelle = int(accounts['accounts'][account]['vertrag']['schwelle'])
             else:
-                vertrag_senden = 0
+                vertrag_senden = False
+
+            # variable setzen - account premium oder nicht
+            premium = int(driver.execute_script('return premium'))
 
             # Taegliches Los abholen
             print('Taegliches Los wird abgeholt...')
@@ -274,7 +331,6 @@ def main():
                 print('Fehler beim Login-Bonus abholen!')
 
             # FARMEN
-
             farmamount = driver.execute_script('return farmamount')
             for farm in range(1, farmamount+1):
                 farmstring = 'return farms_data.farms[' + str(farm) + ']'
@@ -284,15 +340,16 @@ def main():
                     buildingid = farminfo[str(feld)]['buildingid']
                     buildingids_tiere = [2, 3, 4, 5, 11, 12, 15]
                     buildingids_fabrik = [7, 8, 9, 10, 13, 14, 16]
-                    """
-                    premiumfelder überspringen
-                    try:
-                        farminfo[str(feld)]['premium']
-                    except KeyError:
-                        pass
-                    else:
-                        continue
-                    """
+
+                    # premiumfelder bei nicht premium accounts überspringen
+                    if premium == 0:
+                        try:
+                            farminfo[str(feld)]['premium']
+                        except KeyError:
+                            pass
+                        else:
+                            continue
+
                     if 'production' in farminfo[str(feld)]:
                         produkt = farminfo[str(feld)]['production'][0]['pid']
                         remain = farminfo[str(feld)]['production'][0]['remain']
@@ -354,7 +411,21 @@ def main():
                         else:
                             print('FARM', farm, ', FELD', feld, ': Bauplatz nicht freigeschaltet oder leer!')
 
-            if vertrag_senden == 1:
+            # PICKNICK AREA
+            if do_picknick:
+                driver.execute_script('foodworldAction("foodworld_init")')
+                sleep(0.5)
+                picknick = driver.execute_script('return foodworldbuildings')
+                for g in range(1, 5):
+                    try:
+                        picknick[str(g)]['block']
+                    except KeyError:
+                        picknick_starten(driver, g, picknick[str(g)]['slots'], picknick_produkte[str(g)])
+                    else:
+                        continue
+
+            # VERTRAG SENDEN
+            if vertrag_senden:
                 anzahl_string = 'rackElement[' + vertrag_produkt + ']["number"];'
 
                 try:
