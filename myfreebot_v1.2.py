@@ -3,6 +3,7 @@ from selenium import webdriver
 #from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import JavascriptException
+from selenium.common.exceptions import WebDriverException
 from time import sleep
 import json
 
@@ -256,8 +257,9 @@ def login(driver, login_user, login_server, login_pass):
 
     try:
         driver.execute_script('return farm')
-    except JavascriptException:
-        print('Beim Login ist ein Fehler aufgetreten!')
+    except JavascriptException as j:
+        print('Beim Login ist ein Fehler aufgetreten:')
+        print(j)
         exit(1)
     else:
         print('Login erfolgreich!')
@@ -268,12 +270,22 @@ def main():
     # selenium - headless firefox options
     firefox_options = Options()
     firefox_options.headless = True
-    driver = webdriver.Firefox(firefox_binary='',options=firefox_options)
+    try:
+        driver = webdriver.Firefox(firefox_binary='',options=firefox_options)
+    except WebDriverException as e:
+        print('Fehler mit dem GeckoDriver:')
+        print(e)
+        exit(1)
     """
     # selenium - headless chrome options
     chrome_options = Options()
     chrome_options.add_argument('headless')
-    driver = webdriver.Chrome(options=chrome_options)
+    try:
+        driver = webdriver.Chrome(options=chrome_options)
+    except WebDriverException as e:
+        print('Fehler mit dem ChromeDriver:')
+        print(e)
+        exit(1)
 
     while 1:
         with open('accounts.json') as acc_file:
@@ -302,9 +314,10 @@ def main():
             else:
                 do_picknick = False
 
-            # dynamische Produkt Zeiten
-            zeit_string = 'return produkt_zeit[' + saat_id + '];'
-            wartezeit = driver.execute_script(zeit_string)
+            # dynamische Produkt Zeiten aber immer stündlich reinschauen
+            wartezeit = driver.execute_script('return produkt_zeit[' + saat_id + ']')
+            if int(wartezeit) > 3600:
+                wartezeit = 3600
 
             if 'vertrag' in accounts['accounts'][account]:
                 vertrag_senden = True
@@ -348,6 +361,7 @@ def main():
                         except KeyError:
                             pass
                         else:
+                            print('FARM', farm, ', FELD', feld, ': Premium Bauplatz wird übersprungen!')
                             continue
 
                     if 'production' in farminfo[str(feld)]:
@@ -420,7 +434,12 @@ def main():
                     try:
                         picknick[str(g)]['block']
                     except KeyError:
-                        picknick_starten(driver, g, picknick[str(g)]['slots'], picknick_produkte[str(g)])
+                        try:
+                            picknick[str(g)]['cost']
+                        except KeyError:
+                            picknick_starten(driver, g, picknick[str(g)]['slots'], picknick_produkte[str(g)])
+                        else:
+                            continue
                     else:
                         continue
 
