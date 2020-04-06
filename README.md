@@ -1,5 +1,5 @@
 # MyFreeBot
-Ein Python Skript um Prozesse in [Myfreefarm](https://www.myfreefarm.de) zu automatisieren.
+Ein Python Skript um Prozesse in <a href="https://www.myfreefarm.de" target="_blank">Myfreefarm</a> zu automatisieren.
 ## Installation
 ### Linux
 ##### 1. Benötige Software installieren  
