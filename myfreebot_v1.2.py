@@ -96,40 +96,68 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
     """
     rack = driver.execute_script('return rackElement')
     if int(buildingid) == 2:  # Hühner
-        if int(rack['1']['number']) >= int(rack['2']['number']):
-            futtertyp = 1
-        else:
-            futtertyp = 2
+        try:
+            if int(rack['1']['number']) >= int(rack['2']['number']):
+                futtertyp = 1
+            else:
+                futtertyp = 2
+        except TypeError, IndexError:
+            print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
+            return
     elif int(buildingid) == 3:  # Kühe
-        if int(rack['3']['number']) >= int(rack['4']['number']):
-            futtertyp = 3
-        else:
-            futtertyp = 4
+        try:
+            if int(rack['3']['number']) >= int(rack['4']['number']):
+                futtertyp = 3
+            else:
+                futtertyp = 4
+        except TypeError, IndexError:
+            print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
+            return
     elif int(buildingid) == 4:  # Schafe
-        if int(rack['5']['number']) >= int(rack['6']['number']):
-            futtertyp = 5
-        else:
-            futtertyp = 6
+        try:
+            if int(rack['5']['number']) >= int(rack['6']['number']):
+                futtertyp = 5
+            else:
+                futtertyp = 6
+        except TypeError, IndexError:
+            print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
+            return
     elif int(buildingid) == 5:  # Bienen
-        if int(rack['7']['number']) >= int(rack['8']['number']):
-            futtertyp = 7
-        else:
-            futtertyp = 8
+        try:
+            if int(rack['7']['number']) >= int(rack['8']['number']):
+                futtertyp = 7
+            else:
+                futtertyp = 8
+        except TypeError, IndexError:
+            print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
+            return
     elif int(buildingid) == 11:  # Zierfische
-        if int(rack['92']['number']) >= int(rack['93']['number']):
-            futtertyp = 92
-        else:
-            futtertyp = 93
+        try:
+            if int(rack['92']['number']) >= int(rack['93']['number']):
+                futtertyp = 92
+            else:
+                futtertyp = 93
+        except TypeError, IndexError:
+            print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
+            return
     elif int(buildingid) == 12:  # Ziegen
-        if int(rack['108']['number']) >= int(rack['109']['number']):
-            futtertyp = 108
-        else:
-            futtertyp = 109
+        try:
+            if int(rack['108']['number']) >= int(rack['109']['number']):
+                futtertyp = 108
+            else:
+                futtertyp = 109
+        except TypeError, IndexError:
+            print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
+            return
     elif int(buildingid) == 15:  # Hasen
-        if int(rack['153']['number']) >= int(rack['154']['number']):
-            futtertyp = 153
-        else:
-            futtertyp = 154
+        try:
+            if int(rack['153']['number']) >= int(rack['154']['number']):
+                futtertyp = 153
+            else:
+                futtertyp = 154
+        except TypeError, IndexError:
+            print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
+            return
     else:
         print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
         return
