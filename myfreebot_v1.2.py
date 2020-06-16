@@ -101,7 +101,7 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
                 futtertyp = 1
             else:
                 futtertyp = 2
-        except TypeError, IndexError:
+        except (IndexError, KeyError):
             print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
             return
     elif int(buildingid) == 3:  # Kühe
@@ -110,7 +110,7 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
                 futtertyp = 3
             else:
                 futtertyp = 4
-        except TypeError, IndexError:
+        except (IndexError, KeyError):
             print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
             return
     elif int(buildingid) == 4:  # Schafe
@@ -119,7 +119,7 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
                 futtertyp = 5
             else:
                 futtertyp = 6
-        except TypeError, IndexError:
+        except (IndexError, KeyError):
             print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
             return
     elif int(buildingid) == 5:  # Bienen
@@ -128,7 +128,7 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
                 futtertyp = 7
             else:
                 futtertyp = 8
-        except TypeError, IndexError:
+        except (IndexError, KeyError):
             print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
             return
     elif int(buildingid) == 11:  # Zierfische
@@ -137,7 +137,7 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
                 futtertyp = 92
             else:
                 futtertyp = 93
-        except TypeError, IndexError:
+        except (IndexError, KeyError):
             print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
             return
     elif int(buildingid) == 12:  # Ziegen
@@ -146,7 +146,7 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
                 futtertyp = 108
             else:
                 futtertyp = 109
-        except TypeError, IndexError:
+        except (IndexError, KeyError):
             print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
             return
     elif int(buildingid) == 15:  # Hasen
@@ -155,7 +155,7 @@ def tiere_fuettern(driver, farm, feld, futtermenge, buildingid):
                 futtertyp = 153
             else:
                 futtertyp = 154
-        except TypeError, IndexError:
+        except (IndexError, KeyError):
             print('FARM', farm, ', FELD', feld, ': Fehler beim auswählen des Futters. Produktion übersprungen!')
             return
     else:
