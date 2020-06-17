@@ -268,29 +268,33 @@ def countdown(t):
 
 
 def login(driver, login_user, login_server, login_pass):
-    # (re)load the website
-    driver.get('https://www.myfreefarm.de')
+    for r in range(3):
+        print('Login Versuch ' + r)
+        
+        # (re)load the website
+        driver.get('https://www.myfreefarm.de')
 
-    # myfreefarm login routine
-    server_string = '//*[@id="loginserver"]/option[' + login_server + ']'
-    driver.find_element_by_xpath(server_string).click()
-    driver.find_element_by_id('loginusername').send_keys(login_user)  # input username
-    driver.find_element_by_id('loginpassword').send_keys(login_pass)  # input password
-    driver.find_element_by_id('loginbutton').submit()  # click the login button
-    sleep(1)
+        # myfreefarm login routine
+        server_string = '//*[@id="loginserver"]/option[' + login_server + ']'
+        driver.find_element_by_xpath(server_string).click()
+        driver.find_element_by_id('loginusername').send_keys(login_user)  # input username
+        driver.find_element_by_id('loginpassword').send_keys(login_pass)  # input password
+        driver.find_element_by_id('loginbutton').submit()  # click the login button
+        sleep(2)
 
-    server_string = 'http://s' + login_server + '.myfreefarm.de'
-    driver.get(server_string)
-    sleep(1)
+        server_string = 'http://s' + login_server + '.myfreefarm.de'
+        driver.get(server_string)
+        sleep(2)
 
-    try:
-        driver.execute_script('return farm')
-    except JavascriptException as j:
-        print('Beim Login ist ein Fehler aufgetreten:')
-        print(j)
-        exit(1)
-    else:
-        print('Login erfolgreich!')
+        try:
+            driver.execute_script('return farm')
+        except JavascriptException as j:
+            print('Beim Login ist ein Fehler aufgetreten:')
+            print(j)
+            continue
+        else:
+            print('Login erfolgreich!')
+            break
 
 
 def main():
