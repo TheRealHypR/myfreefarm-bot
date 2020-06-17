@@ -268,8 +268,8 @@ def countdown(t):
 
 
 def login(driver, login_user, login_server, login_pass):
-    for r in range(3):
-        print('Login Versuch ' + r)
+    for r in range(1, 4):
+        print('Login Versuch ' + str(r))
         
         # (re)load the website
         driver.get('https://www.myfreefarm.de')
